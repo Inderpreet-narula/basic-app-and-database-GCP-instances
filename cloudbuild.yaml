@@ -1,39 +1,34 @@
+# Access the id_github file from Secret Manager
 steps:
-  # build the container image
-- name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'build', 
-    '-t', 
-    'gcr.io/$PROJECT_ID/${_CLOUD_RUN_SERVICE}', 
-    '.'
-    ]
-  # push the container image to Container Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/${_CLOUD_RUN_SERVICE}']
-  # Deploy container image to Cloud Run
-- name: 'gcr.io/cloud-builders/gcloud'
-  args: [
-    'beta',
-    'run',
-    'deploy',
-    '--allow-unauthenticated',
-    '${_CLOUD_RUN_SERVICE}',
-    '--image',
-    'gcr.io/$PROJECT_ID/${_CLOUD_RUN_SERVICE}',
-    '--region',
-    'us-central1',
-    '--platform',
-    'managed',
-    '--memory',
-    '256Mi',
-    '--update-env-vars',
-    'APP_DEBUG=${_APP_DEBUG}'
-    ]
-images:
-- gcr.io/$PROJECT_ID/${_CLOUD_RUN_SERVICE}
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=basic-app-db-instance > /root/.ssh/id_github' ]
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
 
-options:
-    substitution_option: 'ALLOW_LOOSE'
+# Set up git with key and domain
+- name: 'gcr.io/cloud-builders/git'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    chmod 600 /root/.ssh/id_github
+    cat <<EOF >/root/.ssh/config
+    Hostname github.com
+    IdentityFile /root/.ssh/id_github
+    EOF
+    ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
 
-substitutions:
-    _APP_DEBUG: 'true'
+# Connect to the repository
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - --recurse-submodules
+  - git@github.com:inderpreet-narula/basic-app-and-database-GCP-instances
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
