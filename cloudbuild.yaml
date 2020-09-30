@@ -28,7 +28,7 @@ steps:
   args:
   - clone
   - --recurse-submodules
-  - git@github.com:inderpreet-narula/basic-app-and-database-GCP-instances
+  - git@github.com:inderpreet-narula/test-driven-laravel
   volumes:
   - name: 'ssh'
     path: /root/.ssh
