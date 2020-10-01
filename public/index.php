@@ -1,7 +1,31 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+// use Google\Cloud\ErrorReporting\Bootstrap;
+// use Google\Cloud\Logging\LoggingClient;
+// use Google\Cloud\Core\Report\SimpleMetadataProvider;
+
+// $projectId = 'laravel-psql-basic-instances';
+// $service = 'compute engine';
+// $version = '1';
+
+// $logging = new LoggingClient();
+// $metadata = new SimpleMetadataProvider([], $projectId, $service, $version);
+// $psrLogger = $logging->psrLogger('error-log', [
+//     'metadataProvider' => $metadata
+// ]);
+
+// // Register the logger as a PHP exception and error handler.
+// // This will begin logging application exceptions and errors to Stackdriver.
+// Bootstrap::init($psrLogger);
+
+
+
 
 define('LARAVEL_START', microtime(true));
 
